@@ -1,0 +1,9 @@
+services.py just build socket service
+client.py build a socket client
+
+flash tool: a tool to communicate with board through tcp/uart
+
+uart tool: a tool to test uart
+
+pyinstaller: convert .py to .exe 
+	     python pyinstaller.py -F -w app_name.py
