@@ -104,9 +104,13 @@ class Frame(wx.Frame):
         ##this button just for test whether the board is connected
         ##and test if our commands can send out to the board
         ##the test command is 'printenv'
-        flash_test = wx.Button(panel, label="printenv")
-        sizer.Add(flash_test, pos=(5, 4-1))
-        self.Bind(wx.EVT_BUTTON, self.printenv, flash_test)
+        test_tcp = wx.Button(panel, label="printenv_tcp")
+        sizer.Add(test_tcp, pos=(5, 4-1))
+        self.Bind(wx.EVT_BUTTON, self.printenv_tcp, test_tcp)
+
+        test_uart = wx.Button(panel, label="printenv_uart")
+        sizer.Add(test_uart, pos=(5, 4-2))
+        self.Bind(wx.EVT_BUTTON, self.printenv_uart, test_uart)
         ###
         
         line = wx.StaticLine(panel)
@@ -273,17 +277,37 @@ class Frame(wx.Frame):
         GaugeDia.ShowModal()
         GaugeDia.Destroy()
 
-    def printenv(self, a):
+    def build_uart(self):
+        global ser
+        com_val = ch_com.GetValue()
+        bd_val = ch_bd.GetValue()
+        bd = string.atoi(bd_val)
+        #print type(bd)
+        com_val_str = com_val.encode('utf-8')
+        ser = serial.Serial(com_val_str, bd)
+
+        if ser.isOpen() != True:
+            print "failed to open uart"
+            return False
+        return True
+    
+    def printenv_tcp(self, a):
         self.build_tcp()
         sokt.send("printenv")
 
-    
+    def printenv_uart(self, a):
+        val = "printenv\n"
+        num = ser.write(val)
+        
 class Configure(wx.Dialog):
     def __init__(self, parent = None,
                  title = "Configure"):
         wx.Dialog.__init__(self, parent, title = title)   
     
     def Ui_Uart(self):
+        global ch_com
+        global ch_bd
+
         Port_Cho   = ['com1', 'com2', 'com3', 'com4', 'com5']
         BaudRt_Cho = ['9600', '19200', '38400', '57600', '115200']
         Data_Cho   = ['8 bit', '7 bit']
@@ -298,17 +322,17 @@ class Configure(wx.Dialog):
         text1 = wx.StaticText(pan, label=UartItems[0])
         sizer.Add(text1, pos=(0, 0), flag=wx.LEFT | wx.TOP, border=15)
         
-        self.ch1 = wx.ComboBox(pan, choices = Port_Cho)
-        self.ch1.SetValue(Port_Cho[0])
-        sizer.Add(self.ch1, pos = (0, 1), span=(1, 1),
+        ch_com = wx.ComboBox(pan, choices = Port_Cho)
+        ch_com.SetValue(Port_Cho[0])
+        sizer.Add(ch_com, pos = (0, 1), span=(1, 1),
                   flag=wx.TOP|wx.EXPAND, border = 10)
             
         text2 = wx.StaticText(pan, label=UartItems[1])
         sizer.Add(text2, pos=(1, 0), flag=wx.LEFT | wx.TOP, border=15)       
-        self.ch2 = wx.ComboBox(pan, choices = BaudRt_Cho)
-        sizer.Add(self.ch2, pos = (1, 1), span=(1, 1),
+        ch_bd = wx.ComboBox(pan, choices = BaudRt_Cho)
+        sizer.Add(ch_bd, pos = (1, 1), span=(1, 1),
                   flag=wx.TOP|wx.EXPAND, border = 5)
-        self.ch2.SetValue(BaudRt_Cho[0])
+        ch_bd.SetValue(BaudRt_Cho[0])
           
         text3 = wx.StaticText(pan, label=UartItems[2])
         sizer.Add(text3, pos=(2, 0), flag=wx.LEFT | wx.TOP, border=15)       
@@ -349,9 +373,9 @@ class Configure(wx.Dialog):
         pan.SetSizer(sizer)
 
     def UartOk(self, a):
-        #val = self.ch1.GetValue()
-        #print val
-        return True
+        f = Frame()
+        f.build_uart()
+        self.Destory()
         
     def Ui_Tcp(self):
         global ip_text
