@@ -22,6 +22,7 @@ button3_loc = (1, 2)
 button4_loc = (1, 3)
 button5_loc = (1, 4)
 button6_loc = (1, 5)
+button7_loc = (2, 0)
 
 class Frame(wx.Frame):
     def __init__(self, parent = None, title = "Tool"):
@@ -50,8 +51,9 @@ class Frame(wx.Frame):
         button2 = wx.Button(panel, label="缩小", size=button_size)
         button3 = wx.Button(panel, label="停止", size=button_size)
         button4 = wx.Button(panel, label="4", size=button_size)
-        button5 = wx.Button(panel, label="5", size=button_size)
-        button6 = wx.Button(panel, label="6", size=button_size)
+        button5 = wx.Button(panel, label="放大-十进制", size=button_size)
+        button6 = wx.Button(panel, label="放大-字串/B", size=button_size)
+        button7 = wx.Button(panel, label="放大-字串/7B", size=button_size)
         
         sizer.Add(button1, pos = button1_loc,flag = wx.ALIGN_LEFT, border = 10)
         sizer.Add(button2, pos = button2_loc,flag = wx.ALIGN_LEFT, border = 10)
@@ -59,11 +61,15 @@ class Frame(wx.Frame):
         sizer.Add(button4, pos = button4_loc,flag = wx.ALIGN_LEFT, border = 10)
         sizer.Add(button5, pos = button5_loc,flag = wx.ALIGN_LEFT, border = 10)
         sizer.Add(button6, pos = button6_loc,flag = wx.ALIGN_LEFT, border = 10)
+        sizer.Add(button7, pos = button7_loc,flag = wx.ALIGN_LEFT, border = 10)
+        
         self.Bind(wx.EVT_BUTTON, self.button1_func, button1)
         self.Bind(wx.EVT_BUTTON, self.button2_func, button2)
         self.Bind(wx.EVT_BUTTON, self.button3_func, button3)
         self.Bind(wx.EVT_BUTTON, self.button4_func, button4)
         self.Bind(wx.EVT_BUTTON, self.button5_func, button5)
+        self.Bind(wx.EVT_BUTTON, self.button6_func, button6)
+        self.Bind(wx.EVT_BUTTON, self.button7_func, button7)
 
         sizer.AddGrowableCol(1)
         sizer.AddGrowableRow(2)
@@ -89,7 +95,7 @@ class Frame(wx.Frame):
         val1 = binascii.b2a_hex(val)
         hexval = val1.decode("hex")
         #print hexval
-        num = ser.write(val)
+        num = ser.write(hexval)
         
     def button2_func(self, a):
         val = "ff 01 00 40 00 00 00"
@@ -108,21 +114,29 @@ class Frame(wx.Frame):
 
     def button4_func(self, a):
         val = "ff010020000000"
-        #print type(val)
         hexval = int(val, 16)
         #print hexval
         #print type(hexval)
         num = ser.write(hexval)
 
     def button5_func(self, a):
-        #val = [01,00,20,00,00,00]
-        val = ['FF','01','00','20','00','00','00']
+        val = ["FF",'01','00','20','00','00','00']
         for i in val:
-            int(i, 16)
-            num = ser.write(i)
-            #print i
+            byt = int(i, 16)
+            num = ser.write(byt)
+            #print val
             #print type(i)
-        
+            
+    def button6_func(self, a):
+        val = ["FF",'01','00','20','00','00','00']
+        for i in val:
+            num = ser.write(i)
+            #print val
+            
+    def button7_func(self, a):
+        val = "ff010020000000"
+        num = ser.write(val)
+            
     def InitBar(self):
         '''
             init the menubar and statusbar
